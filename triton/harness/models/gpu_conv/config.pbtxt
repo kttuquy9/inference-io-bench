@@ -1,0 +1,8 @@
+# Workload thật: convolution chạy trên GPU bằng onnxruntime, KHÔNG qua python_backend.
+# Đo trực tiếp = mốc "GPU làm việc thật, không có ranh giới Python".
+# model.onnx sinh bởi gen_onnx.py trong setup.sh.
+backend: "onnxruntime"
+max_batch_size: 64
+input [ { name: "X" data_type: TYPE_FP32 dims: [ 150528 ] } ]
+output [ { name: "Y" data_type: TYPE_FP32 dims: [ 1 ] } ]
+instance_group [ { count: 1 kind: KIND_GPU } ]

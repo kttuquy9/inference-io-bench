@@ -1,0 +1,9 @@
+# Rủi ro giữ bộ nhớ: model cầm HOLD_COUNT mảng input gần nhất (cửa sổ trượt).
+# Với bản vá zero-copy, mảng đang cầm giữ khối shm -> đo /dev/shm + RSS stub có phình không, so với stub gốc.
+# HELD = 1 nếu mọi mảng đang cầm còn nguyên (so tổng đã lưu lúc nhận). run.sh sinh hold_k_<N>.
+backend: "python"
+max_batch_size: 64
+input [ { name: "IN" data_type: TYPE_FP32 dims: [ -1 ] } ]
+output [ { name: "HELD" data_type: TYPE_FP32 dims: [ 1 ] } ]
+instance_group [ { count: 1 kind: KIND_CPU } ]
+parameters { key: "HOLD_COUNT" value: { string_value: "10" } }

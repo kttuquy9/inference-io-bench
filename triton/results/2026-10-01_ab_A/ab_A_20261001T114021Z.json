@@ -1,0 +1,905 @@
+{
+  "boundary": "triton/python_backend/src/pb_tensor.cc:725 (candidate B) + utils.py:49-92 (A) + BLS (C)",
+  "generated_utc": "2026-10-01T11:40:21Z",
+  "instrument": {
+    "gpu": "Tesla T4",
+    "driver": "535.161.08",
+    "vram": "15360 MiB",
+    "container": "24.08-py3",
+    "measure_runs_configured": 10,
+    "noise_floor_ok": true,
+    "floor_measured": true,
+    "floor": [
+      {
+        "elems": 12288,
+        "bytes": 49152,
+        "reuse_us": 2.0,
+        "reuse_sd_us": 0.1,
+        "reuse_gbps": 24.19,
+        "fresh_us": 2.9,
+        "fresh_sd_us": 0.1,
+        "fresh_gbps": 17.09,
+        "fresh_over_reuse": 1.42
+      },
+      {
+        "elems": 150528,
+        "bytes": 602112,
+        "reuse_us": 28.1,
+        "reuse_sd_us": 1.0,
+        "reuse_gbps": 21.4,
+        "fresh_us": 24.7,
+        "fresh_sd_us": 0.4,
+        "fresh_gbps": 24.41,
+        "fresh_over_reuse": 0.88
+      },
+      {
+        "elems": 1555200,
+        "bytes": 6220800,
+        "reuse_us": 499.0,
+        "reuse_sd_us": 8.8,
+        "reuse_gbps": 12.47,
+        "fresh_us": 500.7,
+        "fresh_sd_us": 12.2,
+        "fresh_gbps": 12.42,
+        "fresh_over_reuse": 1.0
+      },
+      {
+        "elems": 24883200,
+        "bytes": 99532800,
+        "reuse_us": 18662.5,
+        "reuse_sd_us": 131.1,
+        "reuse_gbps": 5.33,
+        "fresh_us": 41671.1,
+        "fresh_sd_us": 201.2,
+        "fresh_gbps": 2.39,
+        "fresh_over_reuse": 2.23
+      }
+    ],
+    "usd_per_hour": 0.526,
+    "stub": "stub=/home/ubuntu/patch/out/stub_A sha256=849dd322bb7c37f6",
+    "gpu_sampled": true,
+    "soak_done": false,
+    "coverage": {
+      "sweep": true,
+      "instances": false,
+      "asym": false,
+      "bls": false,
+      "gpu_workload": false,
+      "integrity": false,
+      "chaos": false
+    },
+    "note": "status PROVEN chỉ đặt khi có bản before/after cùng harness và |after-before| > noise std. File này là 1 phía (baseline hoặc after)."
+  },
+  "results": {
+    "sw_identity_fp32_s12288_b1": {
+      "agg": {
+        "p50_us": {
+          "mean": 333.9,
+          "std": 1.04,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 400.9,
+          "std": 14.08,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 2920.29,
+          "std": 19.45,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 16.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 225.7,
+          "std": 2.37,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 5.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 17.0,
+          "std": 0.45,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 45.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 26.0,
+          "std": 1.0,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 16.0,
+        "compute_infer_us": 225.7,
+        "compute_output_us": 5.0,
+        "input_pct_of_compute": 6.5
+      },
+      "physics": {
+        "faults_per_inf": 0.0,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 5e-05,
+        "server_us_per_sample": 246.7,
+        "floor_one_copy_us": 2.0,
+        "copies_equivalent": 123.35
+      }
+    },
+    "sw_identity_fp32_s12288_b16": {
+      "agg": {
+        "p50_us": {
+          "mean": 592.2,
+          "std": 1.4,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 684.7,
+          "std": 33.54,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 26645.51,
+          "std": 138.03,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 78.1,
+          "std": 0.3,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 419.0,
+          "std": 2.1,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 5.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 16.7,
+          "std": 0.64,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 47.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 26.9,
+          "std": 0.94,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 78.1,
+        "compute_infer_us": 419.0,
+        "compute_output_us": 5.0,
+        "input_pct_of_compute": 15.6
+      },
+      "physics": {
+        "faults_per_inf": 0.0,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 5e-06,
+        "server_us_per_sample": 31.4,
+        "floor_one_copy_us": 2.0,
+        "copies_equivalent": 15.69
+      }
+    },
+    "sw_identity_fp32_s150528_b1": {
+      "agg": {
+        "p50_us": {
+          "mean": 530.3,
+          "std": 1.42,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 613.9,
+          "std": 23.99,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 1858.78,
+          "std": 10.55,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 62.8,
+          "std": 0.4,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 372.0,
+          "std": 2.65,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 5.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 16.7,
+          "std": 0.78,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 46.6,
+          "std": 0.49,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 27.0,
+          "std": 1.0,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 62.8,
+        "compute_infer_us": 372.0,
+        "compute_output_us": 5.0,
+        "input_pct_of_compute": 14.3
+      },
+      "physics": {
+        "faults_per_inf": -0.0,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 7.9e-05,
+        "server_us_per_sample": 439.8,
+        "floor_one_copy_us": 28.1,
+        "copies_equivalent": 15.65
+      }
+    },
+    "sw_identity_fp32_s150528_b16": {
+      "agg": {
+        "p50_us": {
+          "mean": 7560.1,
+          "std": 52.51,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 8111.6,
+          "std": 117.92,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 2113.07,
+          "std": 14.86,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 1572.6,
+          "std": 27.39,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 5836.9,
+          "std": 28.19,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 5.5,
+          "std": 0.5,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 14.9,
+          "std": 0.7,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 53.7,
+          "std": 0.9,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 74.9,
+          "std": 3.65,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 1572.6,
+        "compute_infer_us": 5836.9,
+        "compute_output_us": 5.5,
+        "input_pct_of_compute": 21.2
+      },
+      "physics": {
+        "faults_per_inf": 0.0,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 6.9e-05,
+        "server_us_per_sample": 463.4,
+        "floor_one_copy_us": 28.1,
+        "copies_equivalent": 16.49
+      }
+    },
+    "sw_identity_fp32_s1555200_b1": {
+      "agg": {
+        "p50_us": {
+          "mean": 3176.8,
+          "std": 100.81,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 4127.0,
+          "std": 258.06,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 309.79,
+          "std": 9.83,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 784.3,
+          "std": 30.7,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 2275.6,
+          "std": 65.47,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 6.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 15.3,
+          "std": 0.64,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 54.7,
+          "std": 0.9,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 85.3,
+          "std": 4.29,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 784.3,
+        "compute_infer_us": 2275.6,
+        "compute_output_us": 6.0,
+        "input_pct_of_compute": 25.6
+      },
+      "physics": {
+        "faults_per_inf": 0.0,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 0.000472,
+        "server_us_per_sample": 3065.9,
+        "floor_one_copy_us": 499.0,
+        "copies_equivalent": 6.14
+      }
+    },
+    "sw_identity_fp32_s1555200_b16": {
+      "agg": {
+        "p50_us": {
+          "mean": 100889.0,
+          "std": 118.95,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 103343.7,
+          "std": 797.0,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 158.13,
+          "std": 0.2,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 18885.6,
+          "std": 88.92,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 81931.0,
+          "std": 70.48,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 11.1,
+          "std": 2.12,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 25.7,
+          "std": 0.78,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 72.4,
+          "std": 1.02,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 144.5,
+          "std": 2.06,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 18885.6,
+        "compute_infer_us": 81931.0,
+        "compute_output_us": 11.1,
+        "input_pct_of_compute": 18.7
+      },
+      "physics": {
+        "faults_per_inf": 49.7,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 0.000924,
+        "server_us_per_sample": 6301.7,
+        "floor_one_copy_us": 499.0,
+        "copies_equivalent": 12.63
+      }
+    },
+    "sw_identity_in_s12288_b1": {
+      "agg": {
+        "p50_us": {
+          "mean": 322.7,
+          "std": 1.42,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 412.7,
+          "std": 51.33,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 2997.55,
+          "std": 50.05,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 16.5,
+          "std": 0.5,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 217.5,
+          "std": 4.1,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 5.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 17.2,
+          "std": 1.08,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 44.5,
+          "std": 0.5,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 25.5,
+          "std": 0.81,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 16.5,
+        "compute_infer_us": 217.5,
+        "compute_output_us": 5.0,
+        "input_pct_of_compute": 6.9
+      },
+      "physics": {
+        "faults_per_inf": 0.0,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 4.9e-05,
+        "server_us_per_sample": 239.0,
+        "floor_one_copy_us": 2.0,
+        "copies_equivalent": 119.5
+      }
+    },
+    "sw_identity_in_s12288_b16": {
+      "agg": {
+        "p50_us": {
+          "mean": 475.5,
+          "std": 1.36,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 547.4,
+          "std": 14.35,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 33483.65,
+          "std": 159.5,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 78.9,
+          "std": 0.54,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 296.0,
+          "std": 1.61,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 5.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 16.9,
+          "std": 0.7,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 45.8,
+          "std": 0.4,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 27.5,
+          "std": 1.12,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 78.9,
+        "compute_infer_us": 296.0,
+        "compute_output_us": 5.0,
+        "input_pct_of_compute": 20.8
+      },
+      "physics": {
+        "faults_per_inf": 0.0,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 4e-06,
+        "server_us_per_sample": 23.7,
+        "floor_one_copy_us": 2.0,
+        "copies_equivalent": 11.87
+      }
+    },
+    "sw_identity_in_s150528_b1": {
+      "agg": {
+        "p50_us": {
+          "mean": 435.8,
+          "std": 1.47,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 511.8,
+          "std": 33.22,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 2266.49,
+          "std": 27.56,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 63.0,
+          "std": 0.45,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 277.8,
+          "std": 5.31,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 5.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 17.7,
+          "std": 1.68,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 45.3,
+          "std": 0.46,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 24.7,
+          "std": 2.33,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 63.0,
+        "compute_infer_us": 277.8,
+        "compute_output_us": 5.0,
+        "input_pct_of_compute": 18.2
+      },
+      "physics": {
+        "faults_per_inf": -0.0,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 6.4e-05,
+        "server_us_per_sample": 345.8,
+        "floor_one_copy_us": 28.1,
+        "copies_equivalent": 12.31
+      }
+    },
+    "sw_identity_in_s150528_b16": {
+      "agg": {
+        "p50_us": {
+          "mean": 3780.1,
+          "std": 44.47,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 4052.9,
+          "std": 91.52,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 4209.76,
+          "std": 51.07,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 1533.3,
+          "std": 40.0,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 2129.2,
+          "std": 7.07,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 5.9,
+          "std": 0.3,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 13.8,
+          "std": 0.4,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 50.1,
+          "std": 0.3,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 59.0,
+          "std": 1.9,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 1533.3,
+        "compute_infer_us": 2129.2,
+        "compute_output_us": 5.9,
+        "input_pct_of_compute": 41.8
+      },
+      "physics": {
+        "faults_per_inf": 0.0,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 3.5e-05,
+        "server_us_per_sample": 229.3,
+        "floor_one_copy_us": 28.1,
+        "copies_equivalent": 8.16
+      }
+    },
+    "sw_identity_in_s1555200_b1": {
+      "agg": {
+        "p50_us": {
+          "mean": 1527.3,
+          "std": 21.86,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 2055.9,
+          "std": 143.3,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 643.98,
+          "std": 10.15,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 613.3,
+          "std": 5.59,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 824.4,
+          "std": 20.24,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 5.1,
+          "std": 0.3,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 16.4,
+          "std": 1.43,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 47.4,
+          "std": 0.49,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 38.7,
+          "std": 1.95,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 613.3,
+        "compute_infer_us": 824.4,
+        "compute_output_us": 5.1,
+        "input_pct_of_compute": 42.5
+      },
+      "physics": {
+        "faults_per_inf": 0.0,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 0.000227,
+        "server_us_per_sample": 1442.8,
+        "floor_one_copy_us": 499.0,
+        "copies_equivalent": 2.89
+      }
+    },
+    "sw_identity_in_s1555200_b16": {
+      "agg": {
+        "p50_us": {
+          "mean": 61771.1,
+          "std": 344.14,
+          "n": 10
+        },
+        "p99_us": {
+          "mean": 63721.8,
+          "std": 752.44,
+          "n": 10
+        },
+        "throughput": {
+          "mean": 258.88,
+          "std": 1.49,
+          "n": 10
+        },
+        "compute_input_us": {
+          "mean": 18451.9,
+          "std": 281.47,
+          "n": 10
+        },
+        "compute_infer_us": {
+          "mean": 43019.5,
+          "std": 92.7,
+          "n": 10
+        },
+        "compute_output_us": {
+          "mean": 8.6,
+          "std": 0.49,
+          "n": 10
+        },
+        "queue_us": {
+          "mean": 24.0,
+          "std": 0.45,
+          "n": 10
+        },
+        "client_send_us": {
+          "mean": 71.5,
+          "std": 0.81,
+          "n": 10
+        },
+        "network_us": {
+          "mean": 174.0,
+          "std": 3.52,
+          "n": 10
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 10
+        },
+        "_runs": 10
+      },
+      "self_check": {
+        "compute_input_us": 18451.9,
+        "compute_infer_us": 43019.5,
+        "compute_output_us": 8.6,
+        "input_pct_of_compute": 30.0
+      },
+      "physics": {
+        "faults_per_inf": 49.2,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 0.000564,
+        "server_us_per_sample": 3842.5,
+        "floor_one_copy_us": 499.0,
+        "copies_equivalent": 7.7
+      }
+    }
+  },
+  "status": "NOT_PROVEN",
+  "artifact_hash": "2895dd76f207cdf3"
+}

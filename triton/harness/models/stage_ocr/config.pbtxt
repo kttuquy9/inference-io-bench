@@ -1,0 +1,7 @@
+# Stage 3 (OCR giả lập): nhận TRACKS float32, trả LABELS dạng BYTES.
+# Path BYTES kích hoạt serialize_byte_tensor (điểm A, Python thuần).
+backend: "python"
+max_batch_size: 0
+input [ { name: "TRACKS_IN" data_type: TYPE_FP32 dims: [ -1 ] } ]
+output [ { name: "LABELS" data_type: TYPE_STRING dims: [ -1 ] } ]
+instance_group [ { count: 1 kind: KIND_GPU } ]

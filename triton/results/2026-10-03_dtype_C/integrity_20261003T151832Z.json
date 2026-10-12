@@ -1,0 +1,382 @@
+{
+  "boundary": "triton/python_backend/src/pb_tensor.cc:725 (candidate B) + utils.py:49-92 (A) + BLS (C)",
+  "generated_utc": "2026-10-03T15:18:32Z",
+  "instrument": {
+    "gpu": "Tesla T4",
+    "driver": "535.161.08",
+    "vram": "15360 MiB",
+    "container": "24.08-py3",
+    "measure_runs_configured": 10,
+    "noise_floor_ok": false,
+    "floor_measured": false,
+    "floor": [],
+    "usd_per_hour": 0.526,
+    "stub": "stub=/home/ubuntu/patch/out/stub_C sha256=af8ccda9bfcee862\nsrv_env=",
+    "gpu_sampled": false,
+    "soak_done": false,
+    "coverage": {
+      "sweep": false,
+      "instances": false,
+      "asym": false,
+      "bls": false,
+      "gpu_workload": false,
+      "integrity": true,
+      "chaos": false
+    },
+    "note": "status PROVEN chỉ đặt khi có bản before/after cùng harness và |after-before| > noise std. File này là 1 phía (baseline hoặc after)."
+  },
+  "results": {},
+  "quality": {
+    "url": "localhost:8000",
+    "tests": [
+      {
+        "model": "identity_fp32",
+        "elems": 12288,
+        "batch": 1,
+        "requests": 2000,
+        "threads": 8,
+        "wrong": 0,
+        "errors": 0,
+        "first_error": null,
+        "out_values": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0,
+          6.0,
+          7.0,
+          8.0,
+          9.0,
+          10.0
+        ],
+        "seconds": 1.5
+      },
+      {
+        "model": "hold_ref",
+        "elems": 12288,
+        "batch": 1,
+        "requests": 2000,
+        "threads": 8,
+        "wrong": 0,
+        "errors": 0,
+        "first_error": null,
+        "out_values": [
+          0.0
+        ],
+        "seconds": 1.2
+      },
+      {
+        "model": "identity_fp32",
+        "elems": 12288,
+        "batch": 16,
+        "requests": 2000,
+        "threads": 8,
+        "wrong": 0,
+        "errors": 0,
+        "first_error": null,
+        "out_values": [
+          1.0,
+          17.0,
+          33.0,
+          49.0,
+          65.0,
+          81.0,
+          97.0,
+          113.0,
+          129.0,
+          145.0
+        ],
+        "seconds": 8.9
+      },
+      {
+        "model": "hold_ref",
+        "elems": 12288,
+        "batch": 16,
+        "requests": 2000,
+        "threads": 8,
+        "wrong": 0,
+        "errors": 0,
+        "first_error": null,
+        "out_values": [
+          0.0
+        ],
+        "seconds": 3.7
+      },
+      {
+        "model": "identity_fp32",
+        "elems": 1555200,
+        "batch": 1,
+        "requests": 2000,
+        "threads": 8,
+        "wrong": 0,
+        "errors": 0,
+        "first_error": null,
+        "out_values": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0,
+          6.0,
+          7.0,
+          8.0,
+          9.0,
+          10.0
+        ],
+        "seconds": 55.0
+      },
+      {
+        "model": "hold_ref",
+        "elems": 1555200,
+        "batch": 1,
+        "requests": 2000,
+        "threads": 8,
+        "wrong": 0,
+        "errors": 0,
+        "first_error": null,
+        "out_values": [
+          0.0
+        ],
+        "seconds": 37.6
+      },
+      {
+        "model": "identity_fp32",
+        "elems": 1555200,
+        "batch": 16,
+        "requests": 200,
+        "threads": 8,
+        "wrong": 0,
+        "errors": 0,
+        "first_error": null,
+        "out_values": [
+          1.0,
+          17.0,
+          33.0,
+          49.0,
+          65.0,
+          81.0,
+          97.0,
+          113.0,
+          129.0,
+          145.0
+        ],
+        "seconds": 139.4
+      },
+      {
+        "model": "hold_ref",
+        "elems": 1555200,
+        "batch": 16,
+        "requests": 200,
+        "threads": 8,
+        "wrong": 0,
+        "errors": 0,
+        "first_error": null,
+        "out_values": [
+          0.0
+        ],
+        "seconds": 60.6
+      },
+      {
+        "model": "mutate_in",
+        "elems": 12288,
+        "batch": 1,
+        "requests": 2000,
+        "threads": 8,
+        "wrong": 0,
+        "errors": 0,
+        "first_error": null,
+        "out_values": [
+          1.0
+        ],
+        "seconds": 1.1
+      }
+    ],
+    "dtype_tests": [
+      {
+        "model": "dt_check_fp16",
+        "dtype": "FP16",
+        "elems": 12288,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_fp16",
+        "dtype": "FP16",
+        "elems": 1555200,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_fp32",
+        "dtype": "FP32",
+        "elems": 12288,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_fp32",
+        "dtype": "FP32",
+        "elems": 1555200,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_fp64",
+        "dtype": "FP64",
+        "elems": 12288,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_fp64",
+        "dtype": "FP64",
+        "elems": 1555200,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_int8",
+        "dtype": "INT8",
+        "elems": 12288,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_int8",
+        "dtype": "INT8",
+        "elems": 1555200,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_uint8",
+        "dtype": "UINT8",
+        "elems": 12288,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_uint8",
+        "dtype": "UINT8",
+        "elems": 1555200,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_int16",
+        "dtype": "INT16",
+        "elems": 12288,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_int16",
+        "dtype": "INT16",
+        "elems": 1555200,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_int32",
+        "dtype": "INT32",
+        "elems": 12288,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_int32",
+        "dtype": "INT32",
+        "elems": 1555200,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_int64",
+        "dtype": "INT64",
+        "elems": 12288,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_int64",
+        "dtype": "INT64",
+        "elems": 1555200,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_bool",
+        "dtype": "BOOL",
+        "elems": 12288,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      },
+      {
+        "model": "dt_check_bool",
+        "dtype": "BOOL",
+        "elems": 1555200,
+        "requests": 300,
+        "wrong": 0,
+        "held_changed": 0,
+        "errors": 0,
+        "first_error": null
+      }
+    ],
+    "all_dtypes_ok": true,
+    "all_echo_exact": true
+  },
+  "status": "NOT_PROVEN",
+  "artifact_hash": "b7616e68987e4195"
+}

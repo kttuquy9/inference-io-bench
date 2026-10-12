@@ -1,0 +1,164 @@
+{
+  "boundary": "triton/python_backend/src/pb_tensor.cc:725 (candidate B) + utils.py:49-92 (A) + BLS (C)",
+  "generated_utc": "2026-10-03T16:36:33Z",
+  "instrument": {
+    "gpu": "Tesla T4",
+    "driver": "535.161.08",
+    "vram": "15360 MiB",
+    "container": "24.08-py3",
+    "measure_runs_configured": 10,
+    "noise_floor_ok": false,
+    "floor_measured": false,
+    "floor": [],
+    "usd_per_hour": 0.526,
+    "stub": "stub=/home/ubuntu/patch/out/stub_C sha256=af8ccda9bfcee862\nsrv_env=",
+    "gpu_sampled": true,
+    "soak_done": false,
+    "coverage": {
+      "sweep": false,
+      "instances": false,
+      "asym": false,
+      "bls": false,
+      "gpu_workload": false,
+      "integrity": false,
+      "chaos": false
+    },
+    "note": "status PROVEN chỉ đặt khi có bản before/after cùng harness và |after-before| > noise std. File này là 1 phía (baseline hoặc after)."
+  },
+  "results": {
+    "hold_k10": {
+      "agg": {
+        "p50_us": {
+          "mean": 13734.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "p99_us": {
+          "mean": 14884.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "throughput": {
+          "mean": 72.35,
+          "std": 0.0,
+          "n": 1
+        },
+        "compute_input_us": {
+          "mean": 1232.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "compute_infer_us": {
+          "mean": 12384.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "compute_output_us": {
+          "mean": 9.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "queue_us": {
+          "mean": 16.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "client_send_us": {
+          "mean": 59.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "network_us": {
+          "mean": 111.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "_runs": 1
+      },
+      "self_check": {
+        "compute_input_us": 1232.0,
+        "compute_infer_us": 12384.0,
+        "compute_output_us": 9.0,
+        "input_pct_of_compute": 9.0
+      },
+      "physics": {
+        "faults_per_inf": 0.6,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 0.00202
+      }
+    },
+    "hold_k100": {
+      "agg": {
+        "p50_us": {
+          "mean": 13731.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "p99_us": {
+          "mean": 21336.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "throughput": {
+          "mean": 71.28,
+          "std": 0.0,
+          "n": 1
+        },
+        "compute_input_us": {
+          "mean": 1439.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "compute_infer_us": {
+          "mean": 12385.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "compute_output_us": {
+          "mean": 6.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "queue_us": {
+          "mean": 16.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "client_send_us": {
+          "mean": 59.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "network_us": {
+          "mean": 113.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "client_recv_us": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 1
+        },
+        "_runs": 1
+      },
+      "self_check": {
+        "compute_input_us": 1439.0,
+        "compute_infer_us": 12385.0,
+        "compute_output_us": 6.0,
+        "input_pct_of_compute": 10.4
+      },
+      "physics": {
+        "faults_per_inf": 2.5,
+        "gpu_util_pct": 0.0,
+        "usd_per_1k": 0.00205
+      }
+    }
+  },
+  "status": "NOT_PROVEN",
+  "artifact_hash": "23114178ebc3f639"
+}

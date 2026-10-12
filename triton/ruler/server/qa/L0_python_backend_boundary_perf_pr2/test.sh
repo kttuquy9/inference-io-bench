@@ -1,0 +1,100 @@
+#!/bin/bash
+# Copyright 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#  * Neither the name of NVIDIA CORPORATION nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# Boundary cost of the Python backend (see boundary_perf_test.py).
+# First pass (report mode): prints per-sample cost, page faults and gap to the
+# copy floor for each batch size, and never fails.
+# Second pass: TRITON_PYTHON_BACKEND_ZERO_COPY_INPUTS=1 with a page-fault gate.
+
+TEST_PY=./boundary_perf_test.py
+CLIENT_LOG="./boundary_perf_client.log"
+SERVER_LOG="./boundary_perf_server.log"
+TRITON_DIR=${TRITON_DIR:="/opt/tritonserver"}
+SERVER=${TRITON_DIR}/bin/tritonserver
+BACKEND_DIR=${TRITON_DIR}/backends
+SERVER_ARGS="--model-repository=$(pwd)/models --backend-directory=${BACKEND_DIR} --allow-client-shm=true"
+source ../common/util.sh
+
+RET=0
+rm -fr *.log ./models boundary_perf*.json
+
+mkdir -p models/input_only_fp32/1 models/identity_fp32/1
+cp ../python_models/input_only_fp32/model.py models/input_only_fp32/1/
+cp ../python_models/input_only_fp32/config.pbtxt models/input_only_fp32/
+cp ../python_models/identity_fp32/model.py models/identity_fp32/1/
+cp ../python_models/identity_fp32/config.pbtxt models/identity_fp32/
+
+run_server
+if [ "$SERVER_PID" == "0" ]; then
+    echo -e "\n***\n*** Failed to start $SERVER\n***"
+    cat $SERVER_LOG
+    exit 1
+fi
+
+set +e
+python3 $TEST_PY > $CLIENT_LOG 2>&1
+if [ $? -ne 0 ]; then
+    echo -e "\n***\n*** Test Failed\n***"
+    RET=1
+fi
+cat $CLIENT_LOG
+set -e
+
+kill $SERVER_PID
+wait $SERVER_PID
+
+# Zero-copy CPU inputs: with the flag on, large batched inputs must not touch
+# fresh memory in the stub (no per-request copy of the input).
+export TRITON_PYTHON_BACKEND_ZERO_COPY_INPUTS=1
+SERVER_LOG="./boundary_perf_zero_copy_server.log"
+run_server
+if [ "$SERVER_PID" == "0" ]; then
+    echo -e "\n***\n*** Failed to start $SERVER\n***"
+    cat $SERVER_LOG
+    exit 1
+fi
+
+set +e
+BOUNDARY_MODELS=input_only_fp32 BOUNDARY_MAX_FAULTS_PER_SAMPLE=5 \
+    BOUNDARY_RESULT=boundary_perf_zero_copy.json \
+    python3 $TEST_PY > ./boundary_perf_zero_copy_client.log 2>&1
+if [ $? -ne 0 ]; then
+    echo -e "\n***\n*** Zero-copy inputs test Failed\n***"
+    RET=1
+fi
+cat ./boundary_perf_zero_copy_client.log
+set -e
+
+kill $SERVER_PID
+wait $SERVER_PID
+unset TRITON_PYTHON_BACKEND_ZERO_COPY_INPUTS
+
+if [ $RET -eq 0 ]; then
+    echo -e "\n***\n*** Test Passed\n***"
+fi
+
+exit $RET

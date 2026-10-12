@@ -1,0 +1,8 @@
+# Bản đồ chi phí, kiểu GPU: nhận ảnh, gọi qua BLS một model GPU tốn thời gian cố định (GPU_MODEL),
+# mô phỏng "Python nhận ảnh rồi gọi model GPU". run.sh sinh cm_gpu_w<K> trỏ tới cm_spin_d<N>.
+backend: "python"
+max_batch_size: 64
+input [ { name: "IN" data_type: TYPE_FP32 dims: [ -1 ] } ]
+output [ { name: "OUT" data_type: TYPE_FP32 dims: [ 1 ] } ]
+instance_group [ { count: 1 kind: KIND_CPU } ]
+parameters { key: "GPU_MODEL" value: { string_value: "" } }

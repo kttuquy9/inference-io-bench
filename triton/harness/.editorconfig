@@ -1,0 +1,6 @@
+# Ép mọi file trong harness dùng xuống dòng Linux (LF) — VS Code tôn trọng file này khi lưu.
+# Lý do: file upload thẳng lên EC2 qua SFTP; CRLF làm bash báo lỗi $'\r'.
+root = false
+[*]
+end_of_line = lf
+insert_final_newline = true

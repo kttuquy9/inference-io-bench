@@ -1,0 +1,8 @@
+# Workload thật qua ranh giới: Python nhận ảnh rồi gọi gpu_conv bằng BLS.
+# So với gpu_conv gọi thẳng -> hiệu = chi phí ranh giới python_backend khi GPU có việc thật,
+# và GPU bị bỏ đói bao nhiêu % (nvidia-smi).
+backend: "python"
+max_batch_size: 64
+input [ { name: "IN" data_type: TYPE_FP32 dims: [ 150528 ] } ]
+output [ { name: "OUT" data_type: TYPE_FP32 dims: [ 1 ] } ]
+instance_group [ { count: 1 kind: KIND_CPU } ]

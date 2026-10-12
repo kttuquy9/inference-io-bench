@@ -1,0 +1,433 @@
+{
+  "requests": 720,
+  "workload": [
+    [
+      "identity_fp32",
+      1555200,
+      1,
+      200,
+      "IN"
+    ],
+    [
+      "identity_fp32",
+      1555200,
+      16,
+      20,
+      "IN"
+    ],
+    [
+      "identity_in",
+      1555200,
+      1,
+      200,
+      "IN"
+    ],
+    [
+      "identity_in",
+      12288,
+      16,
+      200,
+      "IN"
+    ],
+    [
+      "py_gpu",
+      150528,
+      4,
+      100,
+      "IN"
+    ]
+  ],
+  "regions": [
+    {
+      "region": "triton_python_backend_shm_region_075c2a76-e484-48fb-8b6c-7e95535a2d76",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_1f8c6832-0be8-483e-aa48-054437937711",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_24ca98f8-44ca-4f36-8b1d-2f5deab3c8e7",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_28d0918b-4aba-4288-a2ca-850edd47106c",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_361cf21c-41e0-47e1-8e81-a0b177c2a206",
+      "free_before": 7298512,
+      "free_after": 7298512,
+      "size_before": 7340032,
+      "size_after": 7340032,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_38c8d00c-8820-48bd-947e-1b6d86140736",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_476e7b2b-6174-4980-a8df-e7a644657851",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_4aae8fe8-de22-4e12-a113-819c55aedd51",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_4f16cec2-88a3-497e-bb83-a329caa69ba9",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_53a3c403-945c-4120-96fe-5745adeb20a2",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_57f1bb67-431f-4f55-bba2-ace04e24da68",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_5cb272e7-51f0-44a0-9234-3ea5adbe8f4d",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_5d9f7060-d2d5-4e16-8485-9df5bb33fba1",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_5dbf9bab-5cc3-409e-8058-c6a0cc0a9ab7",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_5fe7bb61-f0c0-4779-a469-e54e406c727d",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_6447ae78-e07e-4b8c-a757-a13f26d823f1",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_6f680fd8-1034-46aa-92bd-b68777a77676",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_71c6d1e4-6513-4cca-bb8c-f7c11e5d5636",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_75f95c53-d268-463e-a930-34fc84c8c04b",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_77c5fbd5-6474-4044-a4a2-820e2469fb10",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_7e28faaa-e301-425a-b15c-52116dfe2f92",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_8350601f-609b-47ee-a2f2-2a7315bd31a5",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_8750cab8-fcf5-4159-8485-ba04400f9efa",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_8f047d46-87fe-457a-bee5-b957141b02db",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_98ae3375-84d4-45cd-9e38-7a4f0419e77b",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_9c5ccc34-4ced-4813-9244-46d98673d411",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_9ce53042-bb09-4e63-badf-c449d4afff41",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_9e9079a0-96cd-4b2b-8cdc-4915bb94f8fc",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_b445b4c7-1393-4f48-b297-6535a7a43d10",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_bd981f2b-8e4b-4b11-ac3d-81cf547780ed",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_be45c9dc-a439-421d-a5a2-8a4e20c29e3e",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_c87b0049-d304-4f85-89a4-cd47eb669df8",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_ceea7f9a-4ced-4302-ba5c-2a76275988ec",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_d23f1b3a-e894-4312-813f-de0877674317",
+      "free_before": 7298512,
+      "free_after": 7298512,
+      "size_before": 7340032,
+      "size_after": 7340032,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_d52ac51e-94bf-4075-b29b-f6ab141da175",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_dc91a297-fc68-4e21-9371-a576e6d435f2",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_dd3f62dd-ab08-4016-81a8-22ae2bae18ac",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_e5c0cf80-d450-4a83-bae9-00b22a88f5e9",
+      "free_before": 1007056,
+      "free_after": 1007056,
+      "size_before": 1048576,
+      "size_after": 1048576,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    },
+    {
+      "region": "triton_python_backend_shm_region_fe3e612b-01b1-4152-b425-2a2466e3dbcc",
+      "free_before": 212819408,
+      "free_after": 212819408,
+      "size_before": 212860928,
+      "size_after": 212860928,
+      "used_before": 41520,
+      "used_after": 41520,
+      "leak_bytes": 0
+    }
+  ],
+  "leak_detected": false
+}

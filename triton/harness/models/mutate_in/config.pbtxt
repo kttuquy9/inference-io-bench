@@ -1,0 +1,9 @@
+# Hợp đồng hành vi: model ghi thẳng vào mảng input (x *= 2, kiểu x /= 255 rất phổ biến).
+# Sau đó đọc lại chính tensor qua DLPack (đọc vùng nhớ gốc, không qua bản numpy).
+# OUT = 1 nếu vùng nhớ gốc thấy thay đổi, 0 nếu không. Ghi lại cả trước và sau vá:
+# nếu giá trị đổi -> bản vá đổi hành vi -> phải có flag hoặc tài liệu, không được lẳng lặng.
+backend: "python"
+max_batch_size: 1024
+input [ { name: "IN" data_type: TYPE_FP32 dims: [ -1 ] } ]
+output [ { name: "OUT" data_type: TYPE_FP32 dims: [ 1 ] } ]
+instance_group [ { count: 1 kind: KIND_CPU } ]

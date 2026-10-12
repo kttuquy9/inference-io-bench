@@ -1,0 +1,17 @@
+--- a/src/pb_tensor.cc	2026-10-01 17:32:08.870205822 +0700
++++ b/src/pb_tensor.cc	2026-10-01 17:32:08.879206439 +0700
+@@ -656,8 +656,12 @@
+       // No native numpy representation for BF16. DLPack should be used instead.
+       numpy_array_ = py::none();
+     } else if (dtype_ != TRITONSERVER_TYPE_BYTES) {
+-      py::object numpy_array =
+-          py::array(triton_to_pybind_dtype(dtype_), dims_, (void*)memory_ptr_);
++      // Wrap the shared memory buffer without copying. Passing a base object
++      // stops pybind11 from copying the buffer. The buffer stays valid because
++      // as_numpy() keeps this tensor, and therefore its shared memory, alive.
++      py::capsule base(memory_ptr_, [](void*) {});
++      py::object numpy_array = py::array(
++          triton_to_pybind_dtype(dtype_), dims_, (void*)memory_ptr_, base);
+       numpy_array_ = numpy_array.attr("view")(triton_to_numpy_type(dtype_));
+     } else {
+       py::object numpy_array = py::array(

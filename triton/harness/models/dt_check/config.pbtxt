@@ -1,0 +1,9 @@
+# Chất lượng theo kiểu dữ liệu: mẫu để run.sh sinh dt_check_<kiểu> (chỉ đổi data_type).
+# OUT  = trả lại nguyên input (client so từng phần tử).
+# HELD = 1 nếu mảng của request trước (model vẫn đang cầm) còn nguyên, 0 nếu bị đổi. Request đầu = 1.
+backend: "python"
+max_batch_size: 64
+input [ { name: "IN" data_type: TYPE_FP32 dims: [ -1 ] } ]
+output [ { name: "OUT" data_type: TYPE_FP32 dims: [ -1 ] },
+         { name: "HELD" data_type: TYPE_FP32 dims: [ 1 ] } ]
+instance_group [ { count: 1 kind: KIND_CPU } ]

@@ -1,0 +1,78 @@
+--- a/src/pb_tensor.cc	2026-10-02 21:29:12.249624374 +0700
++++ b/src/pb_tensor.cc	2026-10-02 21:29:39.239271633 +0700
+@@ -582,6 +582,31 @@
+   }
+ }
+ 
++#ifdef TRITON_PB_STUB
++void
++PbTensor::PinNumpyToSharedMemory(
++    std::unique_ptr<SharedMemoryManager>& shm_pool,
++    bi::managed_external_buffer::handle_t data_handle)
++{
++  if ((memory_type_ != TRITONSERVER_MEMORY_CPU &&
++       memory_type_ != TRITONSERVER_MEMORY_CPU_PINNED) ||
++      dtype_ == TRITONSERVER_TYPE_BF16 || dtype_ == TRITONSERVER_TYPE_BYTES) {
++    return;
++  }
++  // Wrap the shared memory buffer without copying. The tensor object can be
++  // destroyed while the NumPy array is still in use (e.g. the model keeps the
++  // array across requests), so the array owns its own reference to the shared
++  // memory block. The block is not reused until the array is released.
++  auto* block = new AllocatedSharedMemory<char>(shm_pool->Load<char>(data_handle));
++  py::capsule owner(block, [](void* ptr) {
++    delete reinterpret_cast<AllocatedSharedMemory<char>*>(ptr);
++  });
++  py::object numpy_array = py::array(
++      triton_to_pybind_dtype(dtype_), dims_, (void*)memory_ptr_, owner);
++  numpy_array_ = numpy_array.attr("view")(triton_to_numpy_type(dtype_));
++}
++#endif  // TRITON_PB_STUB
++
+ std::unique_ptr<PbTensor>
+ PbTensor::LoadFromSharedMemory(
+     std::unique_ptr<SharedMemoryManager>& shm_pool,
+@@ -606,8 +631,13 @@
+         shm_pool, tensor_shm_ptr->memory, open_cuda_handle);
+   }
+ 
+-  return std::unique_ptr<PbTensor>(
+-      new PbTensor(tensor_shm, name_shm, pb_memory));
++  bi::managed_external_buffer::handle_t data_handle =
++      tensor_shm_ptr->memory == 0 ? tensor_handle : tensor_shm_ptr->memory;
++  std::unique_ptr<PbTensor> tensor(new PbTensor(tensor_shm, name_shm, pb_memory));
++#ifdef TRITON_PB_STUB
++  tensor->PinNumpyToSharedMemory(shm_pool, data_handle);
++#endif
++  return tensor;
+ }
+ 
+ TRITONSERVER_DataType
+@@ -656,9 +686,9 @@
+       // No native numpy representation for BF16. DLPack should be used instead.
+       numpy_array_ = py::none();
+     } else if (dtype_ != TRITONSERVER_TYPE_BYTES) {
+-      py::object numpy_array =
+-          py::array(triton_to_pybind_dtype(dtype_), dims_, (void*)memory_ptr_);
+-      numpy_array_ = numpy_array.attr("view")(triton_to_numpy_type(dtype_));
++      // The NumPy array is created by PinNumpyToSharedMemory() in
++      // LoadFromSharedMemory(), which wraps the shared memory without a copy.
++      numpy_array_ = py::none();
+     } else {
+       py::object numpy_array = py::array(
+           triton_to_pybind_dtype(TRITONSERVER_TYPE_UINT8), {byte_size_},
+--- a/src/pb_tensor.h	2026-10-02 21:29:12.252624335 +0700
++++ b/src/pb_tensor.h	2026-10-02 21:29:39.239271633 +0700
+@@ -179,6 +179,12 @@
+   /// \throw If the tensor is stored in GPU, an exception is thrown
+   /// \return NumPy representation of the Tensor
+   const py::array* AsNumpy() const;
++
++  /// Create the NumPy view of the shared memory buffer. The array keeps its
++  /// own reference to the shared memory block that holds the data.
++  void PinNumpyToSharedMemory(
++      std::unique_ptr<SharedMemoryManager>& shm_pool,
++      bi::managed_external_buffer::handle_t data_handle);
+ #endif
+ 
+   /// Save tensor inside shared memory.

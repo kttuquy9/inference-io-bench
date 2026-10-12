@@ -1,0 +1,239 @@
+diff --git a/README.md b/README.md
+index c7c20e9..5375834 100644
+--- a/README.md
++++ b/README.md
+@@ -62,6 +62,7 @@ any C++ code.
+     - [Important Notes](#important-notes)
+   - [Error Handling](#error-handling-1)
+   - [Managing Shared Memory](#managing-shared-memory)
++    - [Zero-Copy CPU Inputs](#zero-copy-cpu-inputs)
+   - [Multiple Model Instance Support](#multiple-model-instance-support)
+   - [Running Multiple Instances of Triton Server](#running-multiple-instances-of-triton-server)
+ - [Business Logic Scripting](#business-logic-scripting)
+@@ -1163,6 +1164,31 @@ properly set the `--shm-size` flag depending on the size of your inputs and
+ outputs. The default value for docker run command is `64MB` which is very
+ small.
+ 
++### Zero-Copy CPU Inputs
++
++By default, `as_numpy()` on a CPU input tensor returns a NumPy array that holds
++a private copy of the input data. For large inputs (for example batched images)
++this copy, and the fresh memory it needs on every request, can take a large
++part of the request time.
++
++Setting the environment variable `TRITON_PYTHON_BACKEND_ZERO_COPY_INPUTS=1` on
++the Triton server process makes `as_numpy()` on model inputs return an array
++that refers directly to the input data in shared memory, without a copy. The
++array keeps the shared memory buffer alive for as long as the array exists, so
++it is safe to keep the array after `execute` returns.
++
++Things to consider before enabling it:
++
++* Writing into an input array writes into the shared memory buffer of that
++  input. Models that modify their inputs in place should copy them first
++  (`array.copy()`).
++* Input data stays in shared memory while the model holds a reference to the
++  array. Models that keep many inputs alive need a larger shared memory region
++  (see `shm-default-byte-size` above and the Docker `--shm-size` flag).
++* Only CPU inputs of a request are affected. BF16 and string (`TYPE_STRING`)
++  inputs, GPU inputs, and the outputs of BLS requests are copied as before.
++* The default (unset) keeps the existing behavior.
++
+ ## Multiple Model Instance Support
+ 
+ Python interpreter uses a global lock known as
+diff --git a/src/infer_request.cc b/src/infer_request.cc
+index ce6004d..fe3b925 100644
+--- a/src/infer_request.cc
++++ b/src/infer_request.cc
+@@ -306,7 +306,8 @@ InferRequest::LoadFromSharedMemory(
+   for (size_t input_idx = 0; input_idx < infer_request_shm_ptr->input_count;
+        ++input_idx) {
+     std::shared_ptr<PbTensor> input_tensor = PbTensor::LoadFromSharedMemory(
+-        shm_pool, input_names_handle_shm_ptr[input_idx], open_cuda_handle);
++        shm_pool, input_names_handle_shm_ptr[input_idx], open_cuda_handle,
++        true /* zero_copy_eligible */);
+     input_tensors.emplace_back(std::move(input_tensor));
+   }
+ 
+diff --git a/src/pb_tensor.cc b/src/pb_tensor.cc
+index 02c3784..cad7a21 100644
+--- a/src/pb_tensor.cc
++++ b/src/pb_tensor.cc
+@@ -33,6 +33,9 @@
+ #include "pb_stub_utils.h"
+ namespace py = pybind11;
+ #endif
++#include <cstdlib>
++#include <string>
++
+ #include "pb_tensor.h"
+ 
+ // WAR for undefined ssize_t on Windows: https://stackoverflow.com/a/35368387
+@@ -47,6 +50,27 @@ typedef SSIZE_T ssize_t;
+ 
+ namespace triton { namespace backend { namespace python {
+ 
++#ifdef TRITON_PB_STUB
++namespace {
++// Zero-copy CPU inputs are opt-in. With the flag off the behavior is unchanged:
++// every CPU input is copied into a new NumPy array. With the flag on, in-place
++// writes to an input array write to the shared memory buffer of that input.
++bool
++ZeroCopyInputsEnabled()
++{
++  static const bool enabled = [] {
++    const char* value = std::getenv("TRITON_PYTHON_BACKEND_ZERO_COPY_INPUTS");
++    if (value == nullptr) {
++      return false;
++    }
++    std::string v(value);
++    return v == "1" || v == "true" || v == "TRUE" || v == "True";
++  }();
++  return enabled;
++}
++}  // namespace
++#endif  // TRITON_PB_STUB
++
+ #ifdef TRITON_PB_STUB
+ py::array
+ deserialize_bytes_tensor_cpp(const uint8_t* data, size_t data_size)
+@@ -647,10 +671,37 @@ PbTensor::SaveToSharedMemory(
+   }
+ }
+ 
++#ifdef TRITON_PB_STUB
++void
++PbTensor::PinNumpyToSharedMemory(
++    std::unique_ptr<SharedMemoryManager>& shm_pool,
++    bi::managed_external_buffer::handle_t data_handle)
++{
++  if ((memory_type_ != TRITONSERVER_MEMORY_CPU &&
++       memory_type_ != TRITONSERVER_MEMORY_CPU_PINNED) ||
++      dtype_ == TRITONSERVER_TYPE_BF16 || dtype_ == TRITONSERVER_TYPE_BYTES) {
++    return;
++  }
++  // Wrap the shared memory buffer without copying. The tensor object can be
++  // destroyed while the NumPy array is still in use (e.g. the model keeps the
++  // array across requests), so the array owns its own reference to the shared
++  // memory block. The block is not reused until the array is released.
++  auto* block =
++      new AllocatedSharedMemory<char>(shm_pool->Load<char>(data_handle));
++  py::capsule owner(block, [](void* ptr) {
++    delete reinterpret_cast<AllocatedSharedMemory<char>*>(ptr);
++  });
++  py::object numpy_array = py::array(
++      triton_to_pybind_dtype(dtype_), dims_, (void*)memory_ptr_, owner);
++  numpy_array_ = numpy_array.attr("view")(triton_to_numpy_type(dtype_));
++}
++#endif  // TRITON_PB_STUB
++
+ std::unique_ptr<PbTensor>
+ PbTensor::LoadFromSharedMemory(
+     std::unique_ptr<SharedMemoryManager>& shm_pool,
+-    bi::managed_external_buffer::handle_t tensor_handle, bool open_cuda_handle)
++    bi::managed_external_buffer::handle_t tensor_handle, bool open_cuda_handle,
++    bool zero_copy_eligible)
+ {
+   AllocatedSharedMemory<char> tensor_shm = shm_pool->Load<char>(tensor_handle);
+   TensorShm* tensor_shm_ptr =
+@@ -671,8 +722,21 @@ PbTensor::LoadFromSharedMemory(
+         shm_pool, tensor_shm_ptr->memory, open_cuda_handle);
+   }
+ 
++#ifdef TRITON_PB_STUB
++  const bool zero_copy = zero_copy_eligible && ZeroCopyInputsEnabled();
++  bi::managed_external_buffer::handle_t data_handle =
++      tensor_shm_ptr->memory == 0 ? tensor_handle : tensor_shm_ptr->memory;
++  std::unique_ptr<PbTensor> tensor(
++      new PbTensor(tensor_shm, name_shm, pb_memory, zero_copy));
++  if (zero_copy) {
++    tensor->PinNumpyToSharedMemory(shm_pool, data_handle);
++  }
++  return tensor;
++#else
++  (void)zero_copy_eligible;
+   return std::unique_ptr<PbTensor>(
+       new PbTensor(tensor_shm, name_shm, pb_memory));
++#endif  // TRITON_PB_STUB
+ }
+ 
+ TRITONSERVER_DataType
+@@ -695,7 +759,8 @@ PbTensor::ShmHandle()
+ 
+ PbTensor::PbTensor(
+     AllocatedSharedMemory<char>& tensor_shm,
+-    std::unique_ptr<PbString>& name_shm, std::unique_ptr<PbMemory>& pb_memory)
++    std::unique_ptr<PbString>& name_shm, std::unique_ptr<PbMemory>& pb_memory,
++    bool defer_numpy)
+     : tensor_shm_(std::move(tensor_shm)), name_shm_(std::move(name_shm)),
+       pb_memory_(std::move(pb_memory))
+ {
+@@ -721,9 +786,15 @@ PbTensor::PbTensor(
+       // No native numpy representation for BF16. DLPack should be used instead.
+       numpy_array_ = py::none();
+     } else if (dtype_ != TRITONSERVER_TYPE_BYTES) {
+-      py::object numpy_array =
+-          py::array(triton_to_pybind_dtype(dtype_), dims_, (void*)memory_ptr_);
+-      numpy_array_ = numpy_array.attr("view")(triton_to_numpy_type(dtype_));
++      if (defer_numpy) {
++        // The NumPy array is created by PinNumpyToSharedMemory() in
++        // LoadFromSharedMemory(), which wraps the shared memory without a copy.
++        numpy_array_ = py::none();
++      } else {
++        py::object numpy_array = py::array(
++            triton_to_pybind_dtype(dtype_), dims_, (void*)memory_ptr_);
++        numpy_array_ = numpy_array.attr("view")(triton_to_numpy_type(dtype_));
++      }
+     } else {
+       py::object numpy_array = deserialize_bytes_tensor_cpp(
+           static_cast<const uint8_t*>(memory_ptr_), byte_size_);
+diff --git a/src/pb_tensor.h b/src/pb_tensor.h
+index 4f97b64..bc8127e 100644
+--- a/src/pb_tensor.h
++++ b/src/pb_tensor.h
+@@ -103,10 +103,12 @@ class PbTensor {
+   /// \param tensor_shm The name of the tensor
+   /// \param dims_shm Tensor dimensions
+   /// \param pb_string Triton dtype
++  /// \param defer_numpy Do not create the NumPy array here; the caller wraps
++  /// the shared memory with PinNumpyToSharedMemory() instead of copying it.
+   PbTensor(
+       AllocatedSharedMemory<char>& tensor_shm,
+-      std::unique_ptr<PbString>& name_shm,
+-      std::unique_ptr<PbMemory>& pb_memory);
++      std::unique_ptr<PbString>& name_shm, std::unique_ptr<PbMemory>& pb_memory,
++      bool defer_numpy = false);
+ 
+   // Copying tensor objects is not allowed.
+   DISALLOW_COPY_AND_ASSIGN(PbTensor);
+@@ -168,17 +170,28 @@ class PbTensor {
+   /// true will call cudaIpcOpenMemHandle on it. In the main process this option
+   /// should be set to false because we never want to call cudaIpcOpenMemHandle
+   /// in the main process.
++  /// \param zero_copy_eligible Only model inputs set this to true. When the
++  /// zero-copy flag is on, the NumPy array of an eligible CPU tensor wraps the
++  /// shared memory buffer instead of copying it. Other tensors (e.g. BLS
++  /// responses) are always copied, so holding their arrays never keeps shared
++  /// memory allocated.
+   /// \return returns the tensor loaded from shared memory.
+   static std::unique_ptr<PbTensor> LoadFromSharedMemory(
+       std::unique_ptr<SharedMemoryManager>& shm_pool,
+       bi::managed_external_buffer::handle_t tensor_handle,
+-      bool open_cuda_handle);
++      bool open_cuda_handle, bool zero_copy_eligible = false);
+ 
+ #ifdef TRITON_PB_STUB
+   /// Get NumPy representation of the tensor.
+   /// \throw If the tensor is stored in GPU, an exception is thrown
+   /// \return NumPy representation of the Tensor
+   const py::array* AsNumpy() const;
++
++  /// Create the NumPy view of the shared memory buffer. The array keeps its
++  /// own reference to the shared memory block that holds the data.
++  void PinNumpyToSharedMemory(
++      std::unique_ptr<SharedMemoryManager>& shm_pool,
++      bi::managed_external_buffer::handle_t data_handle);
+ #endif
+ 
+   /// Save tensor inside shared memory.

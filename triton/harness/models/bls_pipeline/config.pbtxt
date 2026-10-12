@@ -1,0 +1,8 @@
+# BLS pipeline: nhận FRAME, chạy chuỗi detection -> tracking -> ocr bằng InferenceRequest.exec().
+# Chuỗi 3 model kiểu xử lý video. Mỗi hop qua ranh giới: 1 message + 2 notify/wait + parent chặn future.get()
+# (điểm C: infer_request.cc:418-534, python_be.cc:655). Đầu ra LABELS (BYTES).
+backend: "python"
+max_batch_size: 0
+input [ { name: "FRAME" data_type: TYPE_FP32 dims: [ -1 ] } ]
+output [ { name: "LABELS" data_type: TYPE_STRING dims: [ -1 ] } ]
+instance_group [ { count: 1 kind: KIND_GPU } ]

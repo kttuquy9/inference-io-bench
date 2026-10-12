@@ -1,0 +1,2 @@
+# Git luôn checkout/commit file harness bằng LF, bất kể core.autocrlf trên Windows.
+* text=auto eol=lf

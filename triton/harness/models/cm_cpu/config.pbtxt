@@ -1,0 +1,8 @@
+# Bản đồ chi phí, kiểu CPU: nhận ảnh, đốt CPU đúng WORK_MS mỗi lần execute (mô phỏng tiền xử lý bằng Python).
+# run.sh sinh các bản cm_cpu_w<K> từ thư mục này, chỉ đổi WORK_MS.
+backend: "python"
+max_batch_size: 64
+input [ { name: "IN" data_type: TYPE_FP32 dims: [ -1 ] } ]
+output [ { name: "OUT" data_type: TYPE_FP32 dims: [ 1 ] } ]
+instance_group [ { count: 1 kind: KIND_CPU } ]
+parameters { key: "WORK_MS" value: { string_value: "0" } }

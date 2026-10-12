@@ -1,0 +1,8 @@
+# Identity model: nhận tensor float32 lớn, trả về ngay, không compute.
+# Cô lập chi phí ranh giới core C++ -> stub Python (điểm B: py::array copy).
+# Tự-kiểm: model này KHÔNG có compute, nên mọi ms đo được = chi phí ranh giới + Triton overhead.
+backend: "python"
+max_batch_size: 1024
+input [ { name: "IN" data_type: TYPE_FP32 dims: [ -1 ] } ]
+output [ { name: "OUT" data_type: TYPE_FP32 dims: [ -1 ] } ]
+instance_group [ { count: 1 kind: KIND_GPU } ]

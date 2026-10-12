@@ -1,0 +1,294 @@
+diff --git a/src/infer_request.cc b/src/infer_request.cc
+index ce6004d..fe3b925 100644
+--- a/src/infer_request.cc
++++ b/src/infer_request.cc
+@@ -306,7 +306,8 @@ InferRequest::LoadFromSharedMemory(
+   for (size_t input_idx = 0; input_idx < infer_request_shm_ptr->input_count;
+        ++input_idx) {
+     std::shared_ptr<PbTensor> input_tensor = PbTensor::LoadFromSharedMemory(
+-        shm_pool, input_names_handle_shm_ptr[input_idx], open_cuda_handle);
++        shm_pool, input_names_handle_shm_ptr[input_idx], open_cuda_handle,
++        true /* zero_copy_eligible */);
+     input_tensors.emplace_back(std::move(input_tensor));
+   }
+ 
+diff --git a/src/pb_tensor.cc b/src/pb_tensor.cc
+index 02c3784..f4b378a 100644
+--- a/src/pb_tensor.cc
++++ b/src/pb_tensor.cc
+@@ -33,6 +33,13 @@
+ #include "pb_stub_utils.h"
+ namespace py = pybind11;
+ #endif
++#include <time.h>
++#include <unistd.h>
++
++#include <cstdio>
++#include <cstdlib>
++#include <string>
++
+ #include "pb_tensor.h"
+ 
+ // WAR for undefined ssize_t on Windows: https://stackoverflow.com/a/35368387
+@@ -47,6 +54,68 @@ typedef SSIZE_T ssize_t;
+ 
+ namespace triton { namespace backend { namespace python {
+ 
++#ifdef TRITON_PB_STUB
++namespace {
++// Zero-copy CPU inputs are opt-in. With the flag off the behavior is unchanged:
++// every CPU input is copied into a new NumPy array. With the flag on, in-place
++// writes to an input array write to the shared memory buffer of that input.
++bool
++ZeroCopyInputsEnabled()
++{
++  static const bool enabled = [] {
++    const char* value = std::getenv("TRITON_PYTHON_BACKEND_ZERO_COPY_INPUTS");
++    if (value == nullptr) {
++      return false;
++    }
++    std::string v(value);
++    return v == "1" || v == "true" || v == "TRUE" || v == "True";
++  }();
++  return enabled;
++}
++}  // namespace
++#endif  // TRITON_PB_STUB
++
++
++#ifdef TRITON_PB_STUB
++namespace {
++bool
++ZcDebug()
++{
++  static const bool on = std::getenv("TRITON_PB_ZC_DEBUG") != nullptr;
++  return on;
++}
++uint64_t
++ZcSum(const void* p, uint64_t n)
++{
++  const unsigned char* b = static_cast<const unsigned char*>(p);
++  uint64_t s = 0;
++  for (uint64_t i = 0; i < n && i < 4096; i++) {
++    s = s * 131 + b[i];
++  }
++  return s;
++}
++double
++ZcNowMs()
++{
++  struct timespec ts;
++  clock_gettime(CLOCK_REALTIME, &ts);
++  return ts.tv_sec * 1000.0 + ts.tv_nsec / 1e6;
++}
++struct ZcPinned {
++  AllocatedSharedMemory<char> block;
++  double t_pin;
++  std::string name;
++};
++uint32_t
++ZcRef(void* data)
++{
++  return reinterpret_cast<AllocatedShmOwnership*>(
++             reinterpret_cast<char*>(data) - sizeof(AllocatedShmOwnership))
++      ->ref_count_;
++}
++}  // namespace
++#endif  // TRITON_PB_STUB
++
+ #ifdef TRITON_PB_STUB
+ py::array
+ deserialize_bytes_tensor_cpp(const uint8_t* data, size_t data_size)
+@@ -335,6 +404,16 @@ PbTensor::ToDLPack()
+         "DLPack does not have support for string tensors.");
+   }
+ 
++#ifdef TRITON_PB_STUB
++  if (ZcDebug()) {
++    fprintf(
++        stderr, "ZCDBG t=%.3f todlpack pid=%d name=%s ptr=%p bytes=%lu sum=%lu\n",
++        ZcNowMs(), getpid(), name_.c_str(), memory_ptr_, (unsigned long)byte_size_,
++        (unsigned long)(memory_ptr_ && memory_type_ != TRITONSERVER_MEMORY_GPU
++                            ? ZcSum(memory_ptr_, byte_size_)
++                            : 0));
++  }
++#endif
+   DLManagedTensor* dlpack_tensor = new DLManagedTensor;
+   dlpack_tensor->dl_tensor.ndim = dims_.size();
+   dlpack_tensor->dl_tensor.byte_offset = 0;
+@@ -558,6 +637,17 @@ PbTensor::FromDLPackCapsule(
+ 
+ PbTensor::~PbTensor() noexcept(false)
+ {
++#ifdef TRITON_PB_STUB
++  if (ZcDebug()) {
++    fprintf(
++        stderr, "ZCDBG t=%.3f dtor pid=%d name=%s ptr=%p cpu=%d sum=%lu\n",
++        ZcNowMs(), getpid(),
++        name_.c_str(), memory_ptr_, memory_type_ != TRITONSERVER_MEMORY_GPU,
++        (unsigned long)(memory_ptr_ && memory_type_ != TRITONSERVER_MEMORY_GPU
++                            ? ZcSum(memory_ptr_, byte_size_)
++                            : 0));
++  }
++#endif
+   pb_memory_.reset();
+   DeleteDLPack();
+ 
+@@ -647,10 +737,56 @@ PbTensor::SaveToSharedMemory(
+   }
+ }
+ 
++#ifdef TRITON_PB_STUB
++void
++PbTensor::PinNumpyToSharedMemory(
++    std::unique_ptr<SharedMemoryManager>& shm_pool,
++    bi::managed_external_buffer::handle_t data_handle)
++{
++  if ((memory_type_ != TRITONSERVER_MEMORY_CPU &&
++       memory_type_ != TRITONSERVER_MEMORY_CPU_PINNED) ||
++      dtype_ == TRITONSERVER_TYPE_BF16 || dtype_ == TRITONSERVER_TYPE_BYTES) {
++    return;
++  }
++  // Wrap the shared memory buffer without copying. The tensor object can be
++  // destroyed while the NumPy array is still in use (e.g. the model keeps the
++  // array across requests), so the array owns its own reference to the shared
++  // memory block. The block is not reused until the array is released.
++  auto* pinned = new ZcPinned{shm_pool->Load<char>(data_handle), ZcNowMs(), name_};
++  if (ZcDebug()) {
++    fprintf(
++        stderr,
++        "ZCDBG t=%.3f pin pid=%d name=%s handle=%lu ptr=%p bytes=%lu ref=%u "
++        "sum=%lu\n",
++        pinned->t_pin, getpid(), name_.c_str(), (unsigned long)data_handle,
++        memory_ptr_, (unsigned long)byte_size_,
++        ZcRef(pinned->block.data_.get()),
++        (unsigned long)ZcSum(memory_ptr_, byte_size_));
++  }
++  py::capsule owner(pinned, [](void* ptr) {
++    auto* p = reinterpret_cast<ZcPinned*>(ptr);
++    if (ZcDebug()) {
++      double now = ZcNowMs();
++      fprintf(
++          stderr,
++          "ZCDBG t=%.3f unpin pid=%d name=%s handle=%lu held_ms=%.1f "
++          "ref_before=%u\n",
++          now, getpid(), p->name.c_str(), (unsigned long)p->block.handle_,
++          now - p->t_pin, ZcRef(p->block.data_.get()));
++    }
++    delete p;
++  });
++  py::object numpy_array = py::array(
++      triton_to_pybind_dtype(dtype_), dims_, (void*)memory_ptr_, owner);
++  numpy_array_ = numpy_array.attr("view")(triton_to_numpy_type(dtype_));
++}
++#endif  // TRITON_PB_STUB
++
+ std::unique_ptr<PbTensor>
+ PbTensor::LoadFromSharedMemory(
+     std::unique_ptr<SharedMemoryManager>& shm_pool,
+-    bi::managed_external_buffer::handle_t tensor_handle, bool open_cuda_handle)
++    bi::managed_external_buffer::handle_t tensor_handle, bool open_cuda_handle,
++    bool zero_copy_eligible)
+ {
+   AllocatedSharedMemory<char> tensor_shm = shm_pool->Load<char>(tensor_handle);
+   TensorShm* tensor_shm_ptr =
+@@ -671,8 +807,21 @@ PbTensor::LoadFromSharedMemory(
+         shm_pool, tensor_shm_ptr->memory, open_cuda_handle);
+   }
+ 
++#ifdef TRITON_PB_STUB
++  const bool zero_copy = zero_copy_eligible && ZeroCopyInputsEnabled();
++  bi::managed_external_buffer::handle_t data_handle =
++      tensor_shm_ptr->memory == 0 ? tensor_handle : tensor_shm_ptr->memory;
++  std::unique_ptr<PbTensor> tensor(
++      new PbTensor(tensor_shm, name_shm, pb_memory, zero_copy));
++  if (zero_copy) {
++    tensor->PinNumpyToSharedMemory(shm_pool, data_handle);
++  }
++  return tensor;
++#else
++  (void)zero_copy_eligible;
+   return std::unique_ptr<PbTensor>(
+       new PbTensor(tensor_shm, name_shm, pb_memory));
++#endif  // TRITON_PB_STUB
+ }
+ 
+ TRITONSERVER_DataType
+@@ -695,7 +844,8 @@ PbTensor::ShmHandle()
+ 
+ PbTensor::PbTensor(
+     AllocatedSharedMemory<char>& tensor_shm,
+-    std::unique_ptr<PbString>& name_shm, std::unique_ptr<PbMemory>& pb_memory)
++    std::unique_ptr<PbString>& name_shm, std::unique_ptr<PbMemory>& pb_memory,
++    bool defer_numpy)
+     : tensor_shm_(std::move(tensor_shm)), name_shm_(std::move(name_shm)),
+       pb_memory_(std::move(pb_memory))
+ {
+@@ -721,9 +871,15 @@ PbTensor::PbTensor(
+       // No native numpy representation for BF16. DLPack should be used instead.
+       numpy_array_ = py::none();
+     } else if (dtype_ != TRITONSERVER_TYPE_BYTES) {
+-      py::object numpy_array =
+-          py::array(triton_to_pybind_dtype(dtype_), dims_, (void*)memory_ptr_);
+-      numpy_array_ = numpy_array.attr("view")(triton_to_numpy_type(dtype_));
++      if (defer_numpy) {
++        // The NumPy array is created by PinNumpyToSharedMemory() in
++        // LoadFromSharedMemory(), which wraps the shared memory without a copy.
++        numpy_array_ = py::none();
++      } else {
++        py::object numpy_array = py::array(
++            triton_to_pybind_dtype(dtype_), dims_, (void*)memory_ptr_);
++        numpy_array_ = numpy_array.attr("view")(triton_to_numpy_type(dtype_));
++      }
+     } else {
+       py::object numpy_array = deserialize_bytes_tensor_cpp(
+           static_cast<const uint8_t*>(memory_ptr_), byte_size_);
+diff --git a/src/pb_tensor.h b/src/pb_tensor.h
+index 4f97b64..bc8127e 100644
+--- a/src/pb_tensor.h
++++ b/src/pb_tensor.h
+@@ -103,10 +103,12 @@ class PbTensor {
+   /// \param tensor_shm The name of the tensor
+   /// \param dims_shm Tensor dimensions
+   /// \param pb_string Triton dtype
++  /// \param defer_numpy Do not create the NumPy array here; the caller wraps
++  /// the shared memory with PinNumpyToSharedMemory() instead of copying it.
+   PbTensor(
+       AllocatedSharedMemory<char>& tensor_shm,
+-      std::unique_ptr<PbString>& name_shm,
+-      std::unique_ptr<PbMemory>& pb_memory);
++      std::unique_ptr<PbString>& name_shm, std::unique_ptr<PbMemory>& pb_memory,
++      bool defer_numpy = false);
+ 
+   // Copying tensor objects is not allowed.
+   DISALLOW_COPY_AND_ASSIGN(PbTensor);
+@@ -168,17 +170,28 @@ class PbTensor {
+   /// true will call cudaIpcOpenMemHandle on it. In the main process this option
+   /// should be set to false because we never want to call cudaIpcOpenMemHandle
+   /// in the main process.
++  /// \param zero_copy_eligible Only model inputs set this to true. When the
++  /// zero-copy flag is on, the NumPy array of an eligible CPU tensor wraps the
++  /// shared memory buffer instead of copying it. Other tensors (e.g. BLS
++  /// responses) are always copied, so holding their arrays never keeps shared
++  /// memory allocated.
+   /// \return returns the tensor loaded from shared memory.
+   static std::unique_ptr<PbTensor> LoadFromSharedMemory(
+       std::unique_ptr<SharedMemoryManager>& shm_pool,
+       bi::managed_external_buffer::handle_t tensor_handle,
+-      bool open_cuda_handle);
++      bool open_cuda_handle, bool zero_copy_eligible = false);
+ 
+ #ifdef TRITON_PB_STUB
+   /// Get NumPy representation of the tensor.
+   /// \throw If the tensor is stored in GPU, an exception is thrown
+   /// \return NumPy representation of the Tensor
+   const py::array* AsNumpy() const;
++
++  /// Create the NumPy view of the shared memory buffer. The array keeps its
++  /// own reference to the shared memory block that holds the data.
++  void PinNumpyToSharedMemory(
++      std::unique_ptr<SharedMemoryManager>& shm_pool,
++      bi::managed_external_buffer::handle_t data_handle);
+ #endif
+ 
+   /// Save tensor inside shared memory.

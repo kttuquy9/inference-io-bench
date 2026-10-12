@@ -1,0 +1,9 @@
+# Input-only: nhận tensor lớn, trả về 1 số mỗi mẫu.
+# Tách chi phí chiều VÀO (chép ở pb_tensor.cc:725) khỏi chiều RA: output gần 0 byte nên không có
+# lần chép output. So với identity_fp32 (trả cả tensor) -> hiệu = chi phí chiều ra.
+# run.sh sinh identity_in_i2 / identity_in_i4 từ thư mục này (chỉ đổi count) để đo nhiều instance.
+backend: "python"
+max_batch_size: 1024
+input [ { name: "IN" data_type: TYPE_FP32 dims: [ -1 ] } ]
+output [ { name: "OUT" data_type: TYPE_FP32 dims: [ 1 ] } ]
+instance_group [ { count: 1 kind: KIND_CPU } ]
